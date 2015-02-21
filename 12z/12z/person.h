@@ -1,12 +1,20 @@
-#include<iostream>
+#include <iostream>
+#include<string>
+using namespace std;
 class person
 {
-private:
-	char* name;
+protected:
+	string name;
 public:
-	void getname(char*, int);
-	char* putname();
-	virtual void getmark(char*,float);
-	virtual bool isRetake();
-	~person();
+	virtual void getinfo();
+	virtual void  putinfo();
+};
+
+class student: public person
+{
+private:
+	float mark;
+public:
+	void getinfo();
+	void putinfo();
 };

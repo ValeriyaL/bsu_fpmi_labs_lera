@@ -1,27 +1,30 @@
 #include "person.h"
 #include <iostream>
 #include<cstring>
+#include<string>
 
-void person::getname(char* n, int num)
+void person::getinfo()
 {
-	name = new char [num +1 ];
-	strcpy(name,n);
+	cout<<"Please input name: ";
+	cin>>name;
 }
 
-person::~person()
+
+void person::putinfo()
 {
-	delete [] name;
+	cout<<"Name: "<<name<<endl;
 }
 
-char* person::putname()
+void student::getinfo()
 {
-	return name;
+	person::getinfo();
+	cout<<"Please input mark: ";
+	cin>>mark;
 }
 
-void person::getmark(char* ar,float n)
-{}
 
-bool person::isRetake()
+void student::putinfo()
 {
-	return true;
+	person::putinfo();
+	cout<<"Mark: "<<mark<<endl;
 }
