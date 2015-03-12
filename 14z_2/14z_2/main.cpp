@@ -4,11 +4,7 @@
 #include<algorithm>
 using namespace std;
 
-template<class P, class T>
-bool compare(pair<P, T> p, pair<P, T> q )
-{
-	return p.first < q.first;
-}
+
 
 template<class P, class T, class Compare = less<P>, class C = map<P, T, Compare> >
 class PriorityQueue
@@ -21,20 +17,16 @@ public:
 	typedef typename C::size_type size_type;
 	bool empty() const {return c.empty();}
 	size_type size() const {return c.size();}
-	void enqueue(key_type prior, const mapped_type& val){c.insert(pair<P,T>(prior,val));} 
+	void enqueue(P prior, const T& val){c.insert(pair<P,T>(prior,val));} 
 	void dequeue()
 	{
-		typename C::iterator it = c.begin();
-		typename C::iterator i = c.end();
-		C::iterator max = max_element(c.begin(), c.end(), compare<P, T>);
-		c.erase(max);
+		typename C::iterator i = --c.end();
+		c.erase(i);
 	}
 	mapped_type top ()
 	{
-		typename C::iterator it = c.begin();
-		typename C::iterator i = c.end();
-		C::iterator max = max_element(c.begin(), c.end(), compare<P, T>);
-		return (*max).second; 
+		typename C::iterator i = --c.end();
+		return (*i).second; 
 	}
 };
 
@@ -45,7 +37,7 @@ int main()
 	q1.enqueue(1,"bbb");
 	q1.enqueue(3,"ccc");
 	q1.enqueue(4,"ddd");
-	q1.dequeue(); //delete "ddd"
+	/*q1.dequeue(); *///delete "ddd"
 	cout<<"Size of q1: "<<q1.size()<<endl<<"The element with the biggest key: "<<q1.top()<<endl;
 	return 0;
 }
