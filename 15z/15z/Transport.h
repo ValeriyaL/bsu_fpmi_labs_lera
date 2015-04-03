@@ -9,11 +9,12 @@ using namespace std;
 class Transport
 {
 private:
+	int size;
 	set<string> all_stops;
 	set<int> list_of_numbers;
 	set<string> empty_stops;
 	multimap<int,int> list_of_transport;
-	multimap<int, pair<int, vector<string> > > transport;
+	map<int, map<int, vector<string> > > transport;
 public:
 	void Transport::addRoute(int, int, vector<string>::iterator, vector<string>::iterator);
 	void deleteRoute(int, int);

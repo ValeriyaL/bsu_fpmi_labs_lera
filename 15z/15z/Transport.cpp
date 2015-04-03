@@ -10,40 +10,39 @@
 
 void Transport::addRoute(int numb, int mode, vector<string>::iterator begin, vector<string>::iterator end)
 {
-	multimap<int, pair<int, vector<string> > >::iterator tr = transport.begin();
-	bool is_find = false;
-	pair<multimap<int, pair<int, vector<string> > >::iterator,multimap<int, pair<int, vector<string> > >::iterator> pair_it = transport.equal_range(mode);
-	if(pair_it.first!=transport.end())
-		while (tr!=pair_it.second)
-		{
-			if(tr->second.first == numb)
-			{
-				is_find = true;
-				break;
-			}
-			tr++;
-		}
-	if(!is_find)
+	map<int, map<int, vector<string> > >::iterator find1 = transport.find(mode);
+	if(find1==transport.end())
 	{
 		all_stops.insert(begin,end);
 		vector<string> stops;
 		for(begin; begin!=end; begin++)
 			stops.push_back(*begin);
-		transport.insert(make_pair(mode, make_pair(numb, stops)));
+		map<int, vector<string> > m1;
+			m1.insert(make_pair(numb,stops));
+		transport.insert(make_pair(mode,m1));
+	}
+	else
+	{
+		map<int, vector<string> >::iterator find2 = find1->second.find(numb);
+		if(find2==find1->second.end())
+		{
+			all_stops.insert(begin,end);
+			vector<string> stops;
+			for(begin; begin!=end; begin++)
+				stops.push_back(*begin);
+			find1->second.insert(make_pair(numb,stops));
+		}
 	}
 }
 
 void Transport::deleteRoute(int numb, int mode)
 {
-	multimap<int, pair<int, vector<string> > >::iterator find = transport.find(mode);
-	while(find != transport.end() && find->first == mode)
+	map<int, map<int, vector<string> > >::iterator find1 = transport.find(mode);
+	if(find1!=transport.end())
 	{
-		if (find->second.first == numb)
-		{
-			transport.erase(find);
-			break;
-		}
-		else find++;
+		map<int, vector<string> >::iterator find2 = find1->second.find(numb);
+		if(find2!=find1->second.end())
+			find1->second.erase(find2);
 	}
 }
 
@@ -57,27 +56,62 @@ void Transport::deleteStop(string name)
 	set<string>::iterator find1 = all_stops.find(name);
 	if(find1!=all_stops.end())
 		all_stops.erase(find1);
-	multimap<int, pair<int, vector<string> > >::iterator beg = transport.begin();
-	for(beg; beg!=transport.end(); beg++)
+	map<int, map<int, vector<string> > >::iterator beg = transport.begin();
+	for(beg; beg!=transport.end();)
 	{	
-		vector<string>::iterator find2 = find(beg->second.second.begin(),beg->second.second.end(),name);
-		if(find2!=beg->second.second.end())
+		bool b1 = true;
+		map<int, vector<string> >::iterator beg2 = beg->second.begin();
+		for(beg2; beg2!=beg->second.end();)
 		{
-			beg->second.second.erase(find2);
-			if(beg->second.second.empty())  
+			bool b = true;
+			vector<string>::iterator find2 = find(beg2->second.begin(),beg2->second.end(),name);
+			if(find2!=beg2->second.end())
 			{
-				multimap<int, pair<int, vector<string> > >::iterator i1=beg;
-				beg++;
-				transport.erase(i1);
+				beg2->second.erase(find2);
+				if(beg2->second.empty())
+				{
+					map<int, vector<string> >::iterator i1 = beg2++;
+					if(i1 == beg->second.begin())
+					{
+						b = false;
+						beg->second.erase(i1);
+					}
+					else
+					{
+						beg->second.erase(i1);
+						beg2--;
+					}
+				}
+			}
+			if(b)
+				beg2++;
+		}
+		if(beg->second.empty())
+		{
+			map<int, map<int, vector<string> > >::iterator i2 = beg++;
+			if(i2 == transport.begin())
+			{
+				b1 = false;
+				transport.erase(i2);
+			}
+			else
+			{
+				transport.erase(i2);
 				beg--;
 			}
 		}
+		if(b1)
+			beg++;
 	}
 }
 
 int Transport::number_of_routes()
 {
-	return transport.size();
+	size = 0;
+	map<int, map<int, vector<string> > >::iterator size1 = transport.begin();
+	for(size1; size1!=transport.end(); size1++)
+		size += size1->second.size();
+	return size;
 }
 
 int Transport::number_of_stops()
@@ -87,13 +121,15 @@ int Transport::number_of_stops()
 pair<multimap<int,int>::iterator, multimap<int,int>::iterator> Transport::routes_of_stop(string name)
 {
 	list_of_transport.clear();
-	multimap<int, pair<int, vector<string> > >::iterator beg = transport.begin();
+	map<int, map<int, vector<string> > >::iterator beg = transport.begin();
 	for(beg; beg!=transport.end(); beg++)
 	{	
-		vector<string>::iterator find1 = find(beg->second.second.begin(),beg->second.second.end(),name);
-		if(find1!=beg->second.second.end())
+		map<int, vector<string> >::iterator beg2 = beg->second.begin();
+		for(beg2; beg2!=beg->second.end(); beg2++)
 		{
-			list_of_transport.insert(pair<int,int>(beg->first, beg->second.first));
+			vector<string>::iterator find1 = find(beg2->second.begin(),beg2->second.end(),name);
+			if(find1!=beg2->second.end())
+				list_of_transport.insert(pair<int,int>(beg->first, beg2->first));
 		}
 	}
 	return make_pair(list_of_transport.begin(),list_of_transport.end());
@@ -102,11 +138,15 @@ pair<multimap<int,int>::iterator, multimap<int,int>::iterator> Transport::routes
 pair<set<int>::iterator,set<int>::iterator> Transport::list_of_routs(int vid, int b, int e)
 {
 	list_of_numbers.clear();
-	pair<multimap<int, pair<int, vector<string> > >::iterator,multimap<int, pair<int, vector<string> > >::iterator> pair1 = transport.equal_range(vid);
-	for(multimap<int, pair<int, vector<string> > >::iterator iter = pair1.first; iter!= pair1.second; iter++)
+	map<int, map<int, vector<string> > >::iterator find1 = transport.find(vid);
+	if(find1!=transport.end())
 	{
-		if(iter->second.first >=b && iter->second.first<=e)
-			list_of_numbers.insert(iter->second.first);
+		map<int, vector<string> >::iterator beg = find1->second.begin();
+		for(beg; beg!=find1->second.end(); beg++)
+		{
+			if(beg->first >= b && beg->first <= e)
+				list_of_numbers.insert(beg->first);
+		}
 	}
 	return make_pair(list_of_numbers.begin(),list_of_numbers.end());
 }
@@ -118,14 +158,18 @@ pair<set<string>::iterator,set<string>::iterator> Transport::empty_st()
 	for(iter; iter!=all_stops.end(); iter++)
 	{
 		bool empty = true;
-		multimap<int, pair<int, vector<string> > >::iterator beg = transport.begin();
+		map<int, map<int, vector<string> > >::iterator beg = transport.begin();
 		for(beg; beg!=transport.end(); beg++)
 		{	
-			vector<string>::iterator find1 = find(beg->second.second.begin(),beg->second.second.end(),*iter);
-			if(find1!=beg->second.second.end())
+			map<int, vector<string> >::iterator beg2 = beg->second.begin();
+			for(beg2; beg2!=beg->second.end(); beg2++)
 			{
-				empty = false;
-				break;
+				vector<string>::iterator find1 = find(beg2->second.begin(), beg2->second.end(), *iter);
+				if(find1!=beg2->second.end())
+				{
+					empty = false;
+					break;
+				}
 			}
 		}
 		if(empty)
@@ -138,17 +182,23 @@ string Transport::max_stop()
 {
 	set<string>::iterator st = all_stops.begin();
 	int max_route=0;
+	if (st == all_stops.end())
+		return "";
 	set<string>::iterator ret = all_stops.begin();
 	for(st; st!=all_stops.end(); st++)
 	{
 		int route=0;
-		multimap<int, pair<int, vector<string> > >::iterator beg = transport.begin();
+		map<int, map<int, vector<string> > >::iterator beg = transport.begin();
 		for(beg; beg!=transport.end(); beg++)
 		{	
-			vector<string>::iterator find1 = find(beg->second.second.begin(),beg->second.second.end(),*st);
-			if(find1!=beg->second.second.end())
+			map<int, vector<string> >::iterator beg2 = beg->second.begin();
+			for(beg2; beg2!=beg->second.end(); beg2++)
 			{
-				route++;
+				vector<string>::iterator find1 = find(beg2->second.begin(), beg2->second.end(), *st);
+				if(find1!=beg2->second.end())
+				{
+					route++;
+				}
 			}
 		}
 		if(route>max_route)
