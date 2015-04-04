@@ -12,8 +12,21 @@ int main()
 {
 	Transport X;
 	char answ = 'y';
+	cout<<"Please input number of modes: ";
+	int numb_of_modes;
+	cin>>numb_of_modes;
+	string* str = new string[numb_of_modes];
+	for(int i = 0; i<numb_of_modes; i++)
+	{
+		cout<<"Please input "<<i+1<<" mode: ";
+		cin>>str[i];
+	}
 	do {
-		cout<<"Please input mode:" <<endl<<"1 - bus"<<endl<<"2 - trolleybus"<<endl<<"3 - tram"<<endl;
+		cout<<"Please input mode:" <<endl;
+		for(int i = 0; i<numb_of_modes; i++)
+		{
+			cout<<i+1<<" - "<<str[i]<<endl;
+		}
 		int mode; cin>>mode;
 		int number;
 		cout<<"Please input number: "; cin>>number;
@@ -78,13 +91,11 @@ int main()
 		m.insert(pair1.first, pair1.second);
 		for(multimap<int,int>::iterator it = m.begin(); it!=m.end(); it++)
 		{
-			string mode;
-			if(it->first == 1)
-				cout<<"Bus ";
-			if(it->first == 2)
-				cout<<"Trolleybus ";
-			if(it->first == 3)
-				cout<<"Tram ";
+			for(int i = 0; i<numb_of_modes; i++)
+			{
+				if(it->first == i+1)
+					cout<<str[i]<<" ";
+			}
 			cout<<it->second<<endl;
 		}
 		cout<<"Do you want to have list of routes for another stop?(y/n): ";
