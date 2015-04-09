@@ -7,12 +7,13 @@
 #include <mutex>
 #include <vector> 
 
-std::mutex mutex;
+std::mutex mtx;
 
 unsigned long long sum = 0;
 
 void summ_func(unsigned long long first, unsigned long long second, unsigned long long number)
 {
+	std::unique_lock<std::mutex> lck(mtx, std::defer_lock);
 	for (unsigned long long i = first; i <= second; i++)
 		if (!(number%i))
 			sum += i;
@@ -45,5 +46,6 @@ int main()
 	else
 		std::cout << "Your number isn't perfect" << std::endl;
 	std::cout << "Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(dif).count() << std::endl;
+//	std::cout << "Sum " << sum << std::endl;
 	return 0;
 }
