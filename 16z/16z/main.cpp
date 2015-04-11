@@ -15,17 +15,20 @@ std::atomic<int> index(0);
 
 void summ_func(unsigned long long interval, unsigned long long number)
 {
+	unsigned long long sum2 = 0;
 	while (index<1000)
 		{
 			unsigned long long beg = array[index++];
-			for (unsigned long long i = beg+1; i <= beg + interval; i++)
+			if (beg == 0) break;
+			for (unsigned long long i = beg; i <= beg + interval; i++)
 			{
-				std::unique_lock<std::mutex> lock(mutex);
 				if (!(number%i))
-					sum += i;
-				lock.unlock();
+					sum2 += i;
 			}
 		}
+	std::unique_lock<std::mutex> lock(mutex);
+	sum += sum2;
+	lock.unlock();
 }
 
 int main()
@@ -37,13 +40,24 @@ int main()
 	std::cout << "Please input your number: ";
 	std::cin >> number;
 	std::vector<std::thread> vect1;
-
-	unsigned long long interval = number/2 / 1000;
-	unsigned long long begin = 0;
-	for (int j = 0; j < 1000; j++)
+	unsigned long long interval;
+	if (number < 2000)
 	{
-		array[j] = begin;
-		begin += interval+1;
+		interval = 0;
+		for (int j = 0; j < (number/2)+1; j++)
+		{
+			array[j] = j+1;
+		}
+	}
+	else
+	{
+		interval = number / 2 / 1000;
+		unsigned long long begin = 0;
+		for (int j = 0; j < 1000; j++)
+		{
+			array[j] = begin+1;
+			begin += interval + 1;
+		}
 	}
 	auto start_time = std::chrono::system_clock::now();
 	for (int j = 0; j < threads; j++)
