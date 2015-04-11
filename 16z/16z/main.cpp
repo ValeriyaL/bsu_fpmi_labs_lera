@@ -7,16 +7,25 @@
 #include <mutex>
 #include <vector> 
 
-std::mutex mtx;
+std::mutex mutex;
+std::atomic<unsigned long long> sum(0);
+unsigned long long array[1000];
+std::atomic<int> index(0);
 
-unsigned long long sum = 0;
 
-void summ_func(unsigned long long first, unsigned long long second, unsigned long long number)
+void summ_func(unsigned long long interval, unsigned long long number)
 {
-	std::unique_lock<std::mutex> lck(mtx, std::defer_lock);
-	for (unsigned long long i = first; i <= second; i++)
-		if (!(number%i))
-			sum += i;
+	while (index<1000)
+		{
+			unsigned long long beg = array[index++];
+			for (unsigned long long i = beg+1; i <= beg + interval; i++)
+			{
+				std::unique_lock<std::mutex> lock(mutex);
+				if (!(number%i))
+					sum += i;
+				lock.unlock();
+			}
+		}
 }
 
 int main()
@@ -28,14 +37,17 @@ int main()
 	std::cout << "Please input your number: ";
 	std::cin >> number;
 	std::vector<std::thread> vect1;
-	unsigned long long interval = (number / 2) / threads;
+	unsigned long long interval = number/2 / 1000;
 	unsigned long long begin = 0;
+	for (int j = 0; j < threads; j++)
+	{
+		array[j] = begin;
+		begin += interval+1;
+	}
 	auto start_time = std::chrono::system_clock::now();
 	for (int j = 0; j < threads; j++)
 	{
-		begin++;
-		vect1.push_back(std::thread(summ_func, begin, begin + interval, number));
-		begin += interval;
+		vect1.push_back(std::thread(summ_func, interval, number));
 	}
 	for (int j = 0; j < threads; j++)
 		vect1[j].join();
@@ -46,6 +58,6 @@ int main()
 	else
 		std::cout << "Your number isn't perfect" << std::endl;
 	std::cout << "Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(dif).count() << std::endl;
-//	std::cout << "Sum " << sum << std::endl;
+	//	std::cout << "Sum " << sum << std::endl;
 	return 0;
 }
