@@ -37,9 +37,10 @@ int main()
 	std::cout << "Please input your number: ";
 	std::cin >> number;
 	std::vector<std::thread> vect1;
+
 	unsigned long long interval = number/2 / 1000;
 	unsigned long long begin = 0;
-	for (int j = 0; j < threads; j++)
+	for (int j = 0; j < 1000; j++)
 	{
 		array[j] = begin;
 		begin += interval+1;
