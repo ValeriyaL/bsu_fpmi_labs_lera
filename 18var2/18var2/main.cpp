@@ -17,6 +17,7 @@ int main()
 		cmp eax,number 
 		jg ex
 		mov eax,number
+		xor edx,edx
 		div ecx
 		cmp edx,0
 		je not_simple
