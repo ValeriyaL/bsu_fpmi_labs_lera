@@ -13,6 +13,8 @@ int main()
 	__asm
 	{
 		mov ecx, n
+		cmp ecx,0
+		je exz
 		finit
 		cycle :
 		//(-1)^m
@@ -63,6 +65,10 @@ int main()
 		FST result
 		finit
 		loop cycle
+		jmp ex
+	exz:
+		mov result,0
+	ex:
 	}
 	cout << result << endl;
 	return 0;
