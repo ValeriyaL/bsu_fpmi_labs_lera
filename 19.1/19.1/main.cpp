@@ -3,76 +3,63 @@
 using namespace std;
 int main()
 {
-	float result = 0.0, den = 1.0, mult1 = 1.0, factorial = 1.0, mult2 = 1.0, degree = 1.0, x, mo = -1.0, two = 2.0, counter = 0.0;
+	double result = 0.0, den = 1.0, mult1 = 1.0, mult2 = 1.0, x, two = 2.0;
+	int degree = 1, mo = -1, counter = 0, factorial = 1;
 	int n;
 	cout << "Please input x: ";
 	cin >> x;
 	cout << "Please input n: ";
 	cin >> n;
-
 	__asm
 	{
 		mov ecx, n
-		cmp ecx,0
-		je exz
+		cmp ecx, 0
+		je ex
+	cycle :
 		finit
-		cycle :
 		//(-1)^m
-		FLD mo
-		FLD degree
-		FMUL ST(0), ST(1)
-		FST degree
-		finit
+		mov eax, degree
+		xor edx, edx
+		imul mo
+		mov degree, eax
 		//x^m
 		FLD x
 		FLD den
-		FMUL ST(0), ST(1)
+		FMUL
 		FST den
-		finit
 		//2+chisl/zn
-		FLD mult1
 		FLD two
+		FILD degree
 		FLD den
-		FLD degree
-		FDIV ST(0), ST(1)
-		FADD ST(0), ST(2)
-		FMUL ST(0), ST(3)
-		FST mult1
-		finit
-		//factorial
-		FLD counter
-		FLD1
-		FADD ST(0), ST(1)
-		FST counter
-		finit
-		FLD counter
-		FLD factorial
-		FMUL ST(0), ST(1)
-		FST factorial
-		finit
-		//pr1 / zn2
-		FLD factorial
+		FDIV
+		FADD
 		FLD mult1
-		FDIV ST(0), ST(1)
+		FMUL
+		FST mult1
+		//factorial
+		inc counter
+		mov eax, counter
+		mul factorial
+		mov factorial, eax
+		//pr1 / zn2
+		FLD mult1
+		FILD factorial
+		FDIV
 		FLD mult2
-		FMUL ST(0), ST(1)
+		FMUL
 		FST mult2
-		finit
 		//result
 		FLD mult2
 		FLD result
-		FADD ST(0), ST(1)
+		FADD
 		FST result
-		finit
 		loop cycle
-		jmp ex
-	exz:
-		mov result,0
-	ex:
+	ex :
 	}
 	cout << result << endl;
 	return 0;
 }
+
 
 /* for (int i = 0; i<n; i++)
 {
