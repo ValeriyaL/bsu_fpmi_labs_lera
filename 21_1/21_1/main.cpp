@@ -3,8 +3,8 @@
 using namespace std;
 int main()
 {
-	char* s1 = "abgr fghggjtdjg";
-	char symb = 'r';
+	char* s1 = "tbgr r";
+	char symb = 't';
 	int res = 0;
 	__asm
 	{
@@ -45,6 +45,7 @@ int main()
 		no_symb :
 		mov res, 0
 		ex :
+		cld
 	}
 	cout << res << endl;
 	return 0;
